@@ -1,0 +1,116 @@
+﻿@{
+    ViewData["Title"] = "Dashboard Executivo - Retenção";
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+        margin-bottom: 30px;
+    }
+    .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 20px;
+    }
+    .panel-card {
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .kpi-card {
+        border-left: 6px solid #0056b3;
+    }
+    .kpi-alert { border-left-color: #dc3545; }
+    .kpi-title {
+        font-size: 0.85rem; font-weight: 700; color: #6c757d; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .kpi-value { font-size: 2.2rem; font-weight: 800; color: #212529; }
+    .chart-title {
+        font-size: 1.1rem; font-weight: 700; color: #343a40; margin-bottom: 16px; border-bottom: 1px solid #e9ecef; padding-bottom: 10px;
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <h2 class="font-weight-bold text-dark">Inteligência de Retenção (Churn)</h2>
+    <p class="text-muted">Análise de evasão e impacto financeiro na base ativa.</p>
+
+    <!-- Linha 1: KPIs Executivos -->
+    <div class="dashboard-grid">
+        <div class="panel-card kpi-card">
+            <div class="kpi-title">Base Total de Clientes</div>
+            <div class="kpi-value">@ViewBag.TotalCustomers.ToString("N0")</div>
+        </div>
+        <div class="panel-card kpi-card kpi-alert">
+            <div class="kpi-title">Cancelamentos (Churn)</div>
+            <div class="kpi-value">@ViewBag.TotalChurn.ToString("N0")</div>
+        </div>
+        <div class="panel-card kpi-card kpi-alert">
+            <div class="kpi-title">Taxa de Churn Rate</div>
+            <div class="kpi-value">@ViewBag.ChurnRate.ToString("F2")%</div>
+        </div>
+        <div class="panel-card kpi-card kpi-alert">
+            <div class="kpi-title">MRR Perdido</div>
+            <div class="kpi-value">$ @ViewBag.MrrLost.ToString("N2")</div>
+        </div>
+    </div>
+
+    <!-- Linha 2: Análises Gráficas -->
+    <div class="chart-grid">
+        <div class="panel-card">
+            <div class="chart-title">Evasão por Tipo de Contrato</div>
+            <!-- O SEGREDO ESTÁ NESTA DIV WRAPPER -->
+            <div style="position: relative; height: 300px; width: 100%;">
+                <canvas id="contractChart"></canvas>
+            </div>
+        </div>
+        <div class="panel-card">
+            <div class="chart-title">Evasão por Tecnologia de Internet</div>
+            <!-- O SEGREDO ESTÁ NESTA DIV WRAPPER -->
+            <div style="position: relative; height: 300px; width: 100%;">
+                <canvas id="internetChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Inicialização dos Gráficos com Chart.js usando dados do backend (C#)
+    const ctxContract = document.getElementById('contractChart').getContext('2d');
+    new Chart(ctxContract, {
+        type: 'doughnut',
+        data: {
+            labels: @Html.Raw(Json.Serialize(ViewBag.ContractLabels)),
+            datasets: [{
+                data: @Html.Raw(Json.Serialize(ViewBag.ContractData)),
+                backgroundColor: ['#dc3545', '#ffc107', '#007bff'],
+                borderWidth: 0
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    const ctxInternet = document.getElementById('internetChart').getContext('2d');
+    new Chart(ctxInternet, {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(Json.Serialize(ViewBag.InternetLabels)),
+            datasets: [{
+                label: 'Volume de Cancelamentos',
+                data: @Html.Raw(Json.Serialize(ViewBag.InternetData)),
+                backgroundColor: '#17a2b8',
+                borderRadius: 4
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+        }
+    });
+</script>

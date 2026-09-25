@@ -1,0 +1,16 @@
+# Pastas de build do .NET
+[Bb]in/
+[Oo]bj/
+
+# Arquivos de usuário e cache
+*.user
+*.suo
+*.vscode/
+
+# Ambiente Virtual Python e Cache
+.venv/
+__pycache__/
+*.pyc
+
+# Dados brutos (evita subir o CSV de 100k linhas para o GitHub)
+Data/*.csv
